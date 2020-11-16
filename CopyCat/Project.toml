@@ -1,0 +1,7 @@
+name = "CopyCat"
+uuid = "952700bf-314d-4675-acdf-dc2b8236e9f6"
+authors = ["radekBednarik <radek.bednarik@tesena.com>"]
+version = "0.1.0"
+
+[deps]
+ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
