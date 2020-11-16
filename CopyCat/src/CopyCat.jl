@@ -23,7 +23,6 @@ end
 
 function main()::Nothing
     args::ParsedArgs = parse_cli_args()
-    println(args)
 end
 
 main()
