@@ -1,5 +1,6 @@
 module CopyCat
 
+using Base: values
 using ArgParse
 using Base.Filesystem: abspath
 
@@ -32,7 +33,9 @@ end
 
 function main()
     a = parse_cli_args()
+    abs_paths::Array{String} = convert_path_to_abs.(values(a))
     println(a)
+    print(abs_paths)
 end
 
 main()
