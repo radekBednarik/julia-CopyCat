@@ -3,7 +3,7 @@ module CopyCat
 using Base: values, error
 using Core: throw
 using ArgParse
-using Base.Filesystem: abspath, isdir
+using Base.Filesystem: abspath, cp, isdir, joinpath, mv, walkdir
 
 ParsedArgs = Dict{String, Any}
 
@@ -37,12 +37,33 @@ function convert_path_to_abs(path::String)::String
     throw(error("$path converted to $abs_path does not point to existing directory."))
 end
 
+function process_files(
+    source_path::String,
+    target_path::String,
+    move::Bool = false,
+)::Nothing
+    try
+        for (root, dirs, files) in walkdir(source_path)
+            # here we will handle all moving, or copying files
+            if !move
+                # do copy operations
+                length(files) > 0 && # copy file funct here
+                    return true
+            end
+
+            # do move operations
+            length(files) > 0 && # move file funct here
+                return true
+        end
+    catch err
+        throw(err)
+    end
+end
+
 function main()
     a = parse_cli_args()
     abs_paths::Array{String} = convert_path_to_abs.(values(a))
-
-    println(a)
-    print(abs_paths)
+    process_files(abs_paths[1], abs_paths[2])
 end
 
 main()
