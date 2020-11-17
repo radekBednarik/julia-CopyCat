@@ -4,6 +4,7 @@ using Base: values, error
 using Core: throw
 using ArgParse
 using Base.Filesystem: abspath, cp, isdir, joinpath, mv, walkdir
+using Base.Iterators: enumerate
 
 ParsedArgs = Dict{String, Any}
 
@@ -49,19 +50,16 @@ function process_files(source_path::String, target_path::String, move::Bool = fa
     try
         for (root, dirs, files) in walkdir(source_path)
             # here we will handle all moving, or copying files
-            if !move
-                # do copy operations
-                length(files) > 0 && copy_file.(source_path, target_path, files)
-                return true
+            # are we in root and there are some files?
+            if root === source_path && length(files) > 0
+                !move ? copy_file.(source_path, target_path, files) :
+                move_file.(source_path, target_path, files)
             end
-
-            # do move operations
-            length(files) > 0 && # move file funct here
-                return true
         end
     catch err
         throw(err)
     end
+    return true
 end
 
 function main()
