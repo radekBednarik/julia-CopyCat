@@ -37,18 +37,22 @@ function convert_path_to_abs(path::String)::String
     throw(error("$path converted to $abs_path does not point to existing directory."))
 end
 
-function process_files(
-    source_path::String,
-    target_path::String,
-    move::Bool = false,
-)::Nothing
+function copy_file(source_path::String, target_path::String, file::String)::Any
+    return cp(joinpath(source_path, file), joinpath(target_path, file))
+end
+
+function move_file(source_path::String, target_path::String, file::String)::Any
+    return mv(joinpath(source_path, file), joinpath(target_path, file))
+end
+
+function process_files(source_path::String, target_path::String, move::Bool = false)::Bool
     try
         for (root, dirs, files) in walkdir(source_path)
             # here we will handle all moving, or copying files
             if !move
                 # do copy operations
-                length(files) > 0 && # copy file funct here
-                    return true
+                length(files) > 0 && copy_file.(source_path, target_path, files)
+                return true
             end
 
             # do move operations
