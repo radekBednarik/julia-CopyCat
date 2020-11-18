@@ -4,7 +4,6 @@ using Base: values, error
 using Core: throw
 using ArgParse
 using Base.Filesystem: abspath, cp, isdir, joinpath, mv, splitpath, walkdir, mkdir
-using Base.Iterators: enumerate
 
 ParsedArgs = Dict{String, Any}
 
