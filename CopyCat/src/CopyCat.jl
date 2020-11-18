@@ -30,11 +30,8 @@ end
 
 function convert_path_to_abs(path::String)::String
     abs_path::String = abspath(path)
-
-    if isdir(abs_path)
-        return abs_path
-    end
-    throw(error("$path converted to $abs_path does not point to existing directory."))
+    !isdir(abs_path) && mkdir(abs_path)
+    return abs_path
 end
 
 function copy_file(source_path::String, target_path::String, file::String)::Any

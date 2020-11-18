@@ -6,6 +6,7 @@
         {
             "label": "Julia-CopyCat-run",
             "type": "shell",
+            // "command": "julia --project=. src/CopyCat.jl 'D:/Software Testing/Projects/julia-projects/julia-CopyCat' 'D:/Software Testing/Projects/julia-projects/julia-CopyCat_temp'",
             "command": "julia --project=. src/CopyCat.jl test/source test/target",
             "problemMatcher": []
         }
