@@ -67,10 +67,10 @@ function process_files(source_path::String, target_path::String, move::Bool = fa
                 end
 
                 # logging to console
-                println("ROOT: ", root)
-                println("EXPANSION: ", get_subfolders(root, source_path))
-                println("EXPANDED: ", expanded_target_path)
-                println("FILES: ", files)
+                println("ROOT_SOURCE: ", root)
+                println("EXPANSION_FOR_TARGET: ", get_subfolders(root, source_path))
+                println("EXPANDED_TARGET: ", expanded_target_path)
+                println("FILES_TO_COPY: ", files)
                 println("======================")
 
                 !move ? copy_file.(root, expanded_target_path, files) :
