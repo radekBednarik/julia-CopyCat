@@ -63,6 +63,10 @@ function process_files(source_path::String, target_path::String, move::Bool = fa
                 expanded_target_path::String = target_path
 
                 if root !== source_path
+                    # for some reason, no Filesystem join method works here :o
+                    # they drop all the absolute part until the subfolders
+                    # possible because of this: https://docs.julialang.org/en/v1/base/file/#Base.Filesystem.joinpath
+                    # so I had to just string concat the path
                     expanded_target_path = target_path * get_subfolders(root, source_path)
                 end
 
