@@ -3,7 +3,7 @@ module CopyCat
 using Base: values, error
 using Core: throw
 using ArgParse
-using Base.Filesystem: abspath, cp, isdir, joinpath, mv, splitpath, walkdir, mkdir
+using Base.Filesystem: abspath, cp, isdir, joinpath, mv, splitpath, walkdir, mkpath
 
 ParsedArgs = Dict{String, Any}
 
@@ -30,17 +30,17 @@ end
 
 function convert_path_to_abs(path::String)::String
     abs_path::String = abspath(path)
-    !isdir(abs_path) && mkdir(abs_path)
+    !isdir(abs_path) && mkpath(abs_path)
     return abs_path
 end
 
 function copy_file(source_path::String, target_path::String, file::String)::Any
-    !isdir(target_path) && mkdir(target_path)
+    !isdir(target_path) && mkpath(target_path)
     return cp(joinpath(source_path, file), joinpath(target_path, file))
 end
 
 function move_file(source_path::String, target_path::String, file::String)::Any
-    !isdir(target_path) && mkdir(target_path)
+    !isdir(target_path) && mkpath(target_path)
     return mv(joinpath(source_path, file), joinpath(target_path, file))
 end
 
@@ -65,6 +65,13 @@ function process_files(source_path::String, target_path::String, move::Bool = fa
                     # so I had to just string concat the path
                     expanded_target_path = target_path * get_subfolders(root, source_path)
                 end
+
+                # logging to console
+                println("ROOT: ", root)
+                println("EXPANSION: ", get_subfolders(root, source_path))
+                println("EXPANDED: ", expanded_target_path)
+                println("FILES: ", files)
+                println("======================")
 
                 !move ? copy_file.(root, expanded_target_path, files) :
                 move_file.(root, expanded_target_path, files)
