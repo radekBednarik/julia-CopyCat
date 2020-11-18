@@ -56,6 +56,7 @@ function process_files(source_path::String, target_path::String, move::Bool = fa
             if length(files) > 0
                 expanded_target_path::String = target_path
 
+                # TODO - cannot use just last() - if there are nested folders, it will copy them all to first level :)
                 if root !== source_path
                     expanded_target_path = joinpath(target_path, last(splitpath(root)))
                 end
