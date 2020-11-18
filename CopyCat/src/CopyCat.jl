@@ -48,17 +48,22 @@ function move_file(source_path::String, target_path::String, file::String)::Any
     return mv(joinpath(source_path, file), joinpath(target_path, file))
 end
 
+function get_subfolders(base_path::String, to_replace_path::String)::String
+    !startswith(base_path, to_replace_path) &&
+        throw(error("Not possible to get correct subdirectories sub-path string."))
+
+    return replace(base_path, to_replace_path => String(""))
+end
+
 function process_files(source_path::String, target_path::String, move::Bool = false)::Bool
     try
         for (root, dirs, files) in walkdir(source_path)
-            println(root, ":", dirs, ":", files)
             # here we will handle all moving, or copying files
             if length(files) > 0
                 expanded_target_path::String = target_path
 
-                # TODO - cannot use just last() - if there are nested folders, it will copy them all to first level :)
                 if root !== source_path
-                    expanded_target_path = joinpath(target_path, last(splitpath(root)))
+                    expanded_target_path = target_path * get_subfolders(root, source_path)
                 end
 
                 !move ? copy_file.(root, expanded_target_path, files) :
