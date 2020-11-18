@@ -3,7 +3,7 @@ module CopyCat
 using Base: values, error
 using Core: throw
 using ArgParse
-using Base.Filesystem: abspath, cp, isdir, joinpath, mv, walkdir
+using Base.Filesystem: abspath, cp, isdir, joinpath, mv, splitpath, walkdir, mkdir
 using Base.Iterators: enumerate
 
 ParsedArgs = Dict{String, Any}
@@ -39,21 +39,29 @@ function convert_path_to_abs(path::String)::String
 end
 
 function copy_file(source_path::String, target_path::String, file::String)::Any
+    !isdir(target_path) && mkdir(target_path)
     return cp(joinpath(source_path, file), joinpath(target_path, file))
 end
 
 function move_file(source_path::String, target_path::String, file::String)::Any
+    !isdir(target_path) && mkdir(target_path)
     return mv(joinpath(source_path, file), joinpath(target_path, file))
 end
 
 function process_files(source_path::String, target_path::String, move::Bool = false)::Bool
     try
         for (root, dirs, files) in walkdir(source_path)
+            println(root, ":", dirs, ":", files)
             # here we will handle all moving, or copying files
-            # are we in root and there are some files?
-            if root === source_path && length(files) > 0
-                !move ? copy_file.(source_path, target_path, files) :
-                move_file.(source_path, target_path, files)
+            if length(files) > 0
+                expanded_target_path::String = target_path
+
+                if root !== source_path
+                    expanded_target_path = joinpath(target_path, last(splitpath(root)))
+                end
+
+                !move ? copy_file.(root, expanded_target_path, files) :
+                move_file.(root, expanded_target_path, files)
             end
         end
     catch err
