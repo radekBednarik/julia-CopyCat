@@ -23,6 +23,11 @@ function parse_cli_args()::ParsedArgs
         arg_type = String
         required = true
         nargs = 'A'
+
+        "--move", "-m"
+        help = "Flag: if used, files and folders are MOVED not copied."
+        action = :store_true
+        nargs = 0
     end
 
     return parse_args(settings)
@@ -70,9 +75,10 @@ function process_files(source_path::String, target_path::String, move::Bool = fa
                 println("ROOT_SOURCE: ", root)
                 println("EXPANSION_FOR_TARGET: ", get_subfolders(root, source_path))
                 println("EXPANDED_TARGET: ", expanded_target_path)
-                println("FILES_TO_COPY: ", files)
+                println("FILES: ", files)
                 println("======================")
 
+                # TODO handle folder deletion, if the containing folder is empty
                 !move ? copy_file.(root, expanded_target_path, files) :
                 move_file.(root, expanded_target_path, files)
             end
@@ -85,8 +91,9 @@ end
 
 function main()
     a::ParsedArgs = parse_cli_args()
-    abs_paths::Array{String} = convert_path_to_abs.(values(a))
-    process_files(abs_paths[1], abs_paths[2])
+
+    a["move"] && process_files(abspath(a["source"]), convert_path_to_abs(a["target"]), true)
+    !a["move"] && process_files(abspath(a["source"]), convert_path_to_abs(a["target"]))
 end
 
 main()

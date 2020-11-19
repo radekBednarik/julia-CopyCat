@@ -7,7 +7,8 @@
             "label": "Julia-CopyCat-run",
             "type": "shell",
             // "command": "julia --project=. src/CopyCat.jl '/home/radek/Projects/private/julia/project-copy-cat' '/home/radek/Projects'",
-            "command": "julia --project=. src/CopyCat.jl test/source test/target",
+            // "command": "julia --project=. src/CopyCat.jl test/source test/target -m",
+            "command": "julia --project=. src/CopyCat.jl -h",
             "problemMatcher": []
         }
     ]
