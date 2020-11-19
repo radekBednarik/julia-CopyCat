@@ -1,9 +1,8 @@
 module CopyCat
 
-using Base: values, error
-using Core: throw
+using Base
+using Core
 using ArgParse
-using Base.Filesystem: abspath, cp, isdir, joinpath, mv, splitpath, walkdir, mkpath
 
 ParsedArgs = Dict{String, Any}
 
@@ -78,11 +77,13 @@ function process_files(source_path::String, target_path::String, move::Bool = fa
                 println("FILES: ", files)
                 println("======================")
 
-                # TODO handle folder deletion, if the containing folder is empty
+                # copy or move the files, depending on if flag '-m' is provided 
                 !move ? copy_file.(root, expanded_target_path, files) :
                 move_file.(root, expanded_target_path, files)
             end
         end
+        # delete empty dirs recursively, if flag '-m' is provided, after all files were moved
+        move && rm(source_path, recursive = true)
     catch err
         throw(err)
     end
