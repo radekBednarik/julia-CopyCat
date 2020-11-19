@@ -84,7 +84,7 @@ function process_files(source_path::String, target_path::String, move::Bool = fa
 end
 
 function main()
-    a = parse_cli_args()
+    a::ParsedArgs = parse_cli_args()
     abs_paths::Array{String} = convert_path_to_abs.(values(a))
     process_files(abs_paths[1], abs_paths[2])
 end
