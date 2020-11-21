@@ -4,6 +4,8 @@ using Base
 using Core
 using ArgParse
 
+export main
+
 ParsedArgs = Dict{String, Any}
 
 function parse_cli_args()::ParsedArgs
