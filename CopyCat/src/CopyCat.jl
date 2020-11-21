@@ -27,6 +27,11 @@ function parse_cli_args()::ParsedArgs
         help = "Flag: if used, files and folders are MOVED not copied."
         action = :store_true
         nargs = 0
+
+        "--overwrite", "-o"
+        help = "Flag: if used, existing files in the destination folders will be overwritten."
+        action = :store_true
+        nargs = 0
     end
 
     return parse_args(settings)
@@ -38,13 +43,29 @@ function convert_path_to_abs(path::String)::String
     return abs_path
 end
 
-function copy_file(source_path::String, target_path::String, file::String)::Any
+function copy_file(
+    source_path::String,
+    target_path::String,
+    file::String,
+    overwrite::Bool = false,
+)::Any
     !isdir(target_path) && mkpath(target_path)
+    if overwrite
+        return cp(joinpath(source_path, file), joinpath(target_path, file), force = true)
+    end
     return cp(joinpath(source_path, file), joinpath(target_path, file))
 end
 
-function move_file(source_path::String, target_path::String, file::String)::Any
+function move_file(
+    source_path::String,
+    target_path::String,
+    file::String,
+    overwrite::Bool = false,
+)::Any
     !isdir(target_path) && mkpath(target_path)
+    if overwrite
+        return mv(joinpath(source_path, file), joinpath(target_path, file), force = true)
+    end
     return mv(joinpath(source_path, file), joinpath(target_path, file))
 end
 
@@ -55,7 +76,12 @@ function get_subfolders(base_path::String, to_replace_path::String)::String
     return replace(base_path, to_replace_path => String(""))
 end
 
-function process_files(source_path::String, target_path::String, move::Bool = false)::Bool
+function process_files(
+    source_path::String,
+    target_path::String,
+    move::Bool = false,
+    overwrite::Bool = false,
+)::Bool
     try
         for (root, dirs, files) in walkdir(source_path)
             # here we will handle all moving, or copying files
@@ -78,8 +104,8 @@ function process_files(source_path::String, target_path::String, move::Bool = fa
                 println("======================")
 
                 # copy or move the files, depending on if flag '-m' is provided 
-                !move ? copy_file.(root, expanded_target_path, files) :
-                move_file.(root, expanded_target_path, files)
+                !move ? copy_file.(root, expanded_target_path, files, overwrite) :
+                move_file.(root, expanded_target_path, files, overwrite)
             end
         end
         # delete empty dirs recursively, if flag '-m' is provided, after all files were moved
@@ -93,8 +119,12 @@ end
 function main()
     a::ParsedArgs = parse_cli_args()
 
-    a["move"] && process_files(abspath(a["source"]), convert_path_to_abs(a["target"]), true)
-    !a["move"] && process_files(abspath(a["source"]), convert_path_to_abs(a["target"]))
+    process_files(
+        abspath(a["source"]),
+        convert_path_to_abs(a["target"]),
+        a["move"],
+        a["overwrite"],
+    )
 end
 
 main()
