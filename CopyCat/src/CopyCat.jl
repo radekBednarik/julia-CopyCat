@@ -3,6 +3,7 @@ module CopyCat
 using Base
 using Core
 using ArgParse
+using ProgressBars
 
 export main
 
@@ -30,7 +31,7 @@ function parse_cli_args()::ParsedArgs
         action = :store_true
         nargs = 0
 
-        "--overwrite", "-o"
+        "--force", "-f"
         help = "Flag: if used, existing files in the destination folders will be overwritten."
         action = :store_true
         nargs = 0
@@ -50,7 +51,7 @@ function copy_file(
     target_path::String,
     file::String,
     overwrite::Bool = false,
-)::Any
+)::String
     !isdir(target_path) && mkpath(target_path)
     if overwrite
         return cp(joinpath(source_path, file), joinpath(target_path, file), force = true)
@@ -63,7 +64,7 @@ function move_file(
     target_path::String,
     file::String,
     overwrite::Bool = false,
-)::Any
+)::String
     !isdir(target_path) && mkpath(target_path)
     if overwrite
         return mv(joinpath(source_path, file), joinpath(target_path, file), force = true)
@@ -85,7 +86,7 @@ function process_files(
     overwrite::Bool = false,
 )::Bool
     try
-        for (root, dirs, files) in walkdir(source_path)
+        for (root, dirs, files) in tqdm(walkdir(source_path))
             # here we will handle all moving, or copying files
             if length(files) > 0
                 expanded_target_path::String = target_path
@@ -98,13 +99,6 @@ function process_files(
                     expanded_target_path = target_path * get_subfolders(root, source_path)
                 end
 
-                # logging to console
-                println("ROOT_SOURCE: ", root)
-                println("EXPANSION_FOR_TARGET: ", get_subfolders(root, source_path))
-                println("EXPANDED_TARGET: ", expanded_target_path)
-                println("FILES: ", files)
-                println("======================")
-
                 # copy or move the files, depending on if flag '-m' is provided 
                 !move ? copy_file.(root, expanded_target_path, files, overwrite) :
                 move_file.(root, expanded_target_path, files, overwrite)
@@ -113,20 +107,25 @@ function process_files(
         # delete empty dirs recursively, if flag '-m' is provided, after all files were moved
         move && rm(source_path, recursive = true)
     catch err
-        throw(err)
+        println("Error in function 'process_files': ", err.msg)
+        println("Terminating...")
+        exit()
     end
     return true
 end
 
 function main()
     a::ParsedArgs = parse_cli_args()
+    println("Input arguments parsed.")
+    println("File operation started...")
 
     process_files(
         abspath(a["source"]),
         convert_path_to_abs(a["target"]),
         a["move"],
-        a["overwrite"],
+        a["force"],
     )
+    println("File operation finished.")
 end
 
 main()
