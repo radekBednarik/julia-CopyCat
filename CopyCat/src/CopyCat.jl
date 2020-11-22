@@ -84,7 +84,7 @@ function process_files(
     target_path::String,
     move::Bool = false,
     overwrite::Bool = false,
-)::Bool
+)::Integer
     try
         for (root, dirs, files) in tqdm(walkdir(source_path))
             # here we will handle all moving, or copying files
@@ -108,10 +108,9 @@ function process_files(
         move && rm(source_path, recursive = true)
     catch err
         println("Error in function 'process_files': ", err.msg)
-        println("Terminating...")
-        exit()
+        return 1
     end
-    return true
+    return 0
 end
 
 function main()
@@ -119,13 +118,14 @@ function main()
     println("Input arguments parsed.")
     println("File operation started...")
 
-    process_files(
+    status::Integer = process_files(
         abspath(a["source"]),
         convert_path_to_abs(a["target"]),
         a["move"],
         a["force"],
     )
-    println("File operation finished.")
+    status === 0 && println("File operation finished sucessfully.")
+    status === 1 && println("File operation finished unsuccessfully.")
 end
 
 main()
