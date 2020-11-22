@@ -46,30 +46,29 @@ function convert_path_to_abs(path::String)::String
     return abs_path
 end
 
-function copy_file(
+function handle_file(
     source_path::String,
     target_path::String,
     file::String,
     overwrite::Bool = false,
+    move::Bool = false,
 )::String
     !isdir(target_path) && mkpath(target_path)
-    if overwrite
-        return cp(joinpath(source_path, file), joinpath(target_path, file), force = true)
-    end
-    return cp(joinpath(source_path, file), joinpath(target_path, file))
-end
+    fsp::String = joinpath(source_path, file)
+    ftp::String = joinpath(target_path, file)
 
-function move_file(
-    source_path::String,
-    target_path::String,
-    file::String,
-    overwrite::Bool = false,
-)::String
-    !isdir(target_path) && mkpath(target_path)
-    if overwrite
-        return mv(joinpath(source_path, file), joinpath(target_path, file), force = true)
+    if overwrite && move
+        return mv(fsp, ftp, force = true)
     end
-    return mv(joinpath(source_path, file), joinpath(target_path, file))
+    if overwrite && !move
+        return cp(fsp, ftp, force = true)
+    end
+    if !overwrite && move
+        return mv(fsp, ftp)
+    end
+    if !overwrite && !move
+        return cp(fsp, ftp)
+    end
 end
 
 function get_subfolders(base_path::String, to_replace_path::String)::String
@@ -99,15 +98,13 @@ function process_files(
                     expanded_target_path = target_path * get_subfolders(root, source_path)
                 end
 
-                # copy or move the files, depending on if flag '-m' is provided 
-                !move ? copy_file.(root, expanded_target_path, files, overwrite) :
-                move_file.(root, expanded_target_path, files, overwrite)
+                handle_file.(root, expanded_target_path, files, overwrite, move)
             end
         end
         # delete empty dirs recursively, if flag '-m' is provided, after all files were moved
         move && rm(source_path, recursive = true)
     catch err
-        println("Error in function 'process_files': ", err.msg)
+        println("Error in function 'process_files': ", err)
         return 1
     end
     return 0
